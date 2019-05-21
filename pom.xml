@@ -48,6 +48,10 @@
     <modules>
         <module>registry-server</module>
         <module>service-business</module>
+        <module>service-authserver</module>
+        <module>service-customer</module>
+        <module>service-gateway</module>
+        <module>spring-cloud-gateway</module>
     </modules>
 
 </project>
