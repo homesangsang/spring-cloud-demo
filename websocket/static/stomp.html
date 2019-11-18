@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+<div id="app">
+    <!--<hr>
+    <el-input v-model="token" placeholder="请输入token"></el-input>
+    <hr>-->
+    <h3>hello</h3>
+    <el-button @click="connect">connect</el-button>
+    <el-button @click="disconnect">disconnect</el-button>
+    <br>
+    <br>
+    <el-input v-model="input" placeholder="请输入内容"></el-input>
+    <el-button @click="sendName">sendName</el-button>
+    <br>
+    <br>
+    <el-input type="textarea" v-model="content"></el-input>
+    <!--<br>
+    <br>
+    <hr>
+    <h3>echo</h3>
+    <el-input v-model="echoInput" placeholder="请输入内容"></el-input>
+    <el-button @click="echo">sendName</el-button>
+    <br>
+    <br>
+    <el-input type="input" v-model="echoContent"></el-input>-->
+</div>
+</body>
+<!-- 先引入 Vue -->
+<script src="vue.js"></script>
+<!-- 引入组件库 -->
+<script src="element-ui-index.js"></script>
+<script src="sockjs.js"></script>
+<script src="stomp.js"></script>
+<script>
+    var vue = new Vue({
+        el: '#app',
+        data: function () {
+            return {
+                content: "hello world",
+                stompClient: null,
+                input: "Luke",
+                echoInput: "",
+                echoContent: "",
+                token: ""
+            }
+        },
+        methods: {
+            connect: function () {
+                var that = this;
+                var socket = new WebSocket('ws://localhost:9901/WEBSOCKET/gs-guide-websocket');
+                that.stompClient = Stomp.over(socket);
+                console.log(that.stompClient);
+                that.stompClient.connect({'Authorization': that.token}, function (frame) {
+                    console.log("connected: " + frame);
+                    that.stompClient.subscribe('/topic/greetings', function (greeting) {
+                        console.log(greeting);
+                        that.content += "\n" + greeting.body;
+                    });
+                    that.stompClient.subscribe('/topic/echo', function (echo) {
+                        console.log(echo);
+                        that.echoContent = echo.body;
+                    });
+                    that.$notify({
+                        title: '成功',
+                        message: '成功',
+                        type: 'success',
+                        duration: -1
+                    });
+                }, function (error) {
+                    console.error(error);
+                });
+            },
+            disconnect: function () {
+                if (null != this.stompClient) {
+                    this.stompClient.disconnect();
+                }
+                console.log("disconnected.")
+            },
+            sendName: function () {
+                var that = this;
+                that.stompClient.send("/app/greeting/hello", {'Authorization': that.token}, JSON.stringify({'name': that.input}));
+            },
+            echo: function () {
+                var that = this;
+                that.stompClient.send('/app/greeting/echo', {'Authorization': that.token}, JSON.stringify({"name": that.echoInput}));
+            }
+        }
+    })
+</script>
+</html>
